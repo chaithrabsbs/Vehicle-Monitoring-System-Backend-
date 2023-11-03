@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "wz6WGQvff91Kp13O6fZL2/vVlWvap/AWtmMcmEjk+3g=",
+  "Source": "VehicleStatusTracker",
+  "BasePath": "_content/VehicleStatusTracker",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
