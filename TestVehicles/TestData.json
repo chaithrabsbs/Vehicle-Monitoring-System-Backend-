@@ -1,0 +1,88 @@
+
+  [
+    {
+      "id": 1,
+      "vin": "YS2R4X20005399401",
+      "registrationNumber": "ABC123",
+      "status": "Connected",
+      "customerId": 1,
+      "customer": {
+        "id": 1,
+        "name": "Kalles Grustransporter AB",
+        "address": "Cementvägen 8, 111 11 Södertälje"
+      }
+    },
+    {
+      "id": 2,
+      "vin": "VLUR4X20009093588",
+      "registrationNumber": "DEF456",
+      "status": "Disconnected",
+      "customerId": 1,
+      "customer": {
+        "id": 1,
+        "name": "Kalles Grustransporter AB",
+        "address": "Cementvägen 8, 111 11 Södertälje"
+      }
+    },
+    {
+      "id": 3,
+      "vin": "VLUR4X20009048066",
+      "registrationNumber": "GHI789",
+      "status": "Connected",
+      "customerId": 1,
+      "customer": {
+        "id": 1,
+        "name": "Kalles Grustransporter AB",
+        "address": "Cementvägen 8, 111 11 Södertälje"
+      }
+    },
+    {
+      "id": 4,
+      "vin": "YS2R4X20005388011",
+      "registrationNumber": "JKL012",
+      "status": "Connected",
+      "customerId": 2,
+      "customer": {
+        "id": 2,
+        "name": "Johans Bulk AB",
+        "address": "Balkvägen 12, 222 22 Stockholm"
+      }
+    },
+    {
+      "id": 5,
+      "vin": "YS2R4X20005387949",
+      "registrationNumber": "MNO345",
+      "status": "Connected",
+      "customerId": 2,
+      "customer": {
+        "id": 2,
+        "name": "Johans Bulk AB",
+        "address": "Balkvägen 12, 222 22 Stockholm"
+      }
+    },
+    {
+      "id": 6,
+      "vin": "YS2R4X20005387765",
+      "registrationNumber": "PQR678",
+      "status": "Connected",
+      "customerId": 3,
+      "customer": {
+        "id": 3,
+        "name": "Haralds Värdetransporter AB",
+        "address": "Budgetvägen 1, 333 33 Uppsala"
+      }
+    },
+    {
+      "id": 7,
+      "vin": "YS2R4X20005387055",
+      "registrationNumber": "STU901",
+      "status": "Disconnected",
+      "customerId": 3,
+      "customer": {
+        "id": 3,
+        "name": "Haralds Värdetransporter AB",
+        "address": "Budgetvägen 1, 333 33 Uppsala"
+      }
+    }
+  ]
+
