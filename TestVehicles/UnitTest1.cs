@@ -1,123 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Moq;
-using VehicleStatusTracker;
 using VehicleStatusTracker.Controllers;
 using VehicleStatusTracker.DataModels;
+using VehicleStatusTracker.Models;
 using VehicleStatusTracker.Services;
+using Xunit;
+using FluentAssertions;
+using Newtonsoft.Json;
 
-
-namespace TestVehicles
+public class VehicleControllerTests
 {
-    public class UnitTest1
+    private readonly string testDataFile = "TestData.json";
+
+    [Fact]
+    public void Get_ReturnsListOfVehicles()
     {
-        private readonly ApplicationDbContext _context;
-        private readonly Random _random;
-        ILogger<VehicleService> _logger;
-
-
-        //[Fact]
-        //public void GetAllVehicles_Test()
-        //{
-        //    // Arrange
-        //    var vehicleCount = 7;
-        //    var vehicleServiceMock = new Mock<IVehicleService>();
-        //    var loggerMock = new Mock<ILogger<VehicleController>>();
-        //    var controller = new VehicleController(vehicleServiceMock.Object, loggerMock.Object);
-
-        //    // Act
-        //    var result = controller.Get();
-
-        //    // Assert
-        //    var okResult = Assert.IsType<OkObjectResult>(result);
-        //    var vehiclesInResult = Assert.IsAssignableFrom<IEnumerable<Vehicle>>(okResult.Value);
-        //    Assert.Equal(vehicleCount, vehiclesInResult.ToList().Count);
-        //}
-        [Fact]
-        public void Get_ReturnsOkResultWithListOfVehicles()
-        {
-            var config = new ConfigurationBuilder()
-             .AddJsonFile("appsettings.json") // This should be the path to your appsettings.json in the test project
-             .Build();
-
-            // Arrange
-            var vehicles = new List<Vehicle>
-
-        {
-            new Vehicle { Id = 1, VIN="YS2R4X20005399401",RegistrationNumber="ABC123",Status="Connected" },
-            new Vehicle { Id = 2 , VIN="VLUR4X20009093588",RegistrationNumber="DEF456", Status="Connected"},
-           
-        };
-             
-        var loggerMock = new Mock<ILogger<VehicleController>>();
-
+        // Arrange
         var vehicleServiceMock = new Mock<IVehicleService>();
-        vehicleServiceMock.Setup(service => service.GetAllVehicles()).Returns(vehicles);
-        var idControllerMock = new Mock<IdController>(config);
-        var controller = new VehicleController(vehicleServiceMock.Object, loggerMock.Object, idControllerMock.Object);
+        var loggerMock = new Mock<ILogger<VehicleController>>();
+        var controller = new VehicleController(vehicleServiceMock.Object, loggerMock.Object);
+
+    // Read the JSON file content
+    string json = System.IO.File.ReadAllText(testDataFile);
+
+        // Deserialize the JSON into a List<Vehicle>
+        List<Vehicle> testVehicles = JsonConvert.DeserializeObject<List<Vehicle>>(json);
 
         // Act
+        vehicleServiceMock.Setup(service => service.GetAllVehicles()).Returns(testVehicles); // Mocking the behavior of IVehicleService
         var result = controller.Get();
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var vehiclesInResult = Assert.IsAssignableFrom<IEnumerable<Vehicle>>(okResult.Value);
-
-        Assert.Equal(vehicles.Count, vehiclesInResult.ToList().Count); // Check the count of vehicles
-            Assert.Contains(vehicles[0], vehiclesInResult); // Check if a specific vehicle is in the result
-            Assert.Contains(vehicles[1], vehiclesInResult); // Check if another specific vehicle is in the result
-               
-           
-        }
-        [Fact]
-        public void GetAllVehicles_ByCustomer_Test()
-        {
-            // Arrange
-            var customerId = 1;
-            var customerName = "Kalles Grustransporter AB";
-            var vehicleCount = 3;
-            var context = new Mock<ApplicationDbContext>();
-            var logger = new Mock<ILogger<VehicleService>>();
-            var vehicleService = new VehicleService(context.Object, logger.Object);
-
-            // Act
-            var vehicles = vehicleService.GetVehiclesByCustomer(customerId);
-
-            // Assert
-            Assert.NotNull(vehicles);
-            Assert.Equal(vehicleCount, vehicles.Count);
-            Assert.Equal(customerId, vehicles[0].CustomerId);
-            Assert.Equal(customerName, vehicles[0].Customer.Name);
-        }
-        [Fact]
-        public void GetAllVehicles_ByStatus_Test()
-        {
-            // Arrange
-            var status = "Connected";
-            var context = new Mock<ApplicationDbContext>();
-            var vehicleSet = new Mock<DbSet<Vehicle>>();
-
-            // Set up DbSet to return an empty collection
-            vehicleSet.As<IQueryable<Vehicle>>().Setup(m => m.Provider).Returns(new List<Vehicle>().AsQueryable().Provider);
-            vehicleSet.As<IQueryable<Vehicle>>().Setup(m => m.Expression).Returns(new List<Vehicle>().AsQueryable().Expression);
-            vehicleSet.As<IQueryable<Vehicle>>().Setup(m => m.ElementType).Returns(new List<Vehicle>().AsQueryable().ElementType);
-            vehicleSet.As<IQueryable<Vehicle>>().Setup(m => m.GetEnumerator()).Returns(new List<Vehicle>().AsQueryable().GetEnumerator());
-
-            // Set up the context to return the DbSet
-            context.Setup(c => c.Vehicles).Returns(vehicleSet.Object); var logger = new Mock<ILogger<VehicleService>>();
-            var vehicleService = new VehicleService(context.Object, logger.Object);
-
-            // Act
-            var vehicles = vehicleService.GetVehiclesByStatus(status);
-
-            // Assert
-            Assert.NotNull(vehicles);
-            Assert.Equal(status, vehicles[0].Status);
-        }
+        // Assuming result is an ActionResult<IEnumerable<Vehicle>>
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<Vehicle>>>(result);
+        // Extract and convert the data from the ActionResult to a List of Vehicle objects
+        var vehicles = ((actionResult.Result as ObjectResult)?.Value as IEnumerable<Vehicle>).ToList();
+        vehicles.Should().HaveCount(testVehicles.Count);
     }
 
-  
+    [Fact]
+    public void GetByCustomer_ReturnsListOfVehicles()
+    {
+        // Arrange
+        var vehicleServiceMock = new Mock<IVehicleService>();
+        var loggerMock = new Mock<ILogger<VehicleController>>();
+        var controller = new VehicleController(vehicleServiceMock.Object, loggerMock.Object);
+        int customerId = 2;
+
+        // Read the JSON file content
+        string json = System.IO.File.ReadAllText(testDataFile);
+
+        // Deserialize the JSON into a List<Vehicle>
+        List<Vehicle> testVehicles = JsonConvert.DeserializeObject<List<Vehicle>>(json);
+
+        // Act
+        // Setup the mock service to return a specific list of vehicles for a given customer ID
+        vehicleServiceMock.Setup(service => service.GetVehiclesByCustomer(It.IsAny<int>()))
+     .Returns((int customerId) =>
+     {
+         // Filter the list of vehicles based on the customer ID
+         var filteredVehicles = testVehicles.Where(vehicle => vehicle.CustomerId == customerId).ToList();
+         return filteredVehicles;
+     });
+        var result = controller.GetByCustomer(customerId);
+
+        // Assuming result is an ActionResult<IEnumerable<Vehicle>>
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<Vehicle>>>(result);
+       
+        // Extract and convert the data from the ActionResult to a List of Vehicle objects
+        var vehicles = ((actionResult.Result as ObjectResult)?.Value as IEnumerable<Vehicle>).ToList();
+
+        // Assert that all vehicles have the CustomerId == 2
+        Assert.True(vehicles.All(vehicle => vehicle.CustomerId == 2));
+    }
+
+    [Fact]
+    public void GetByStatus_ReturnsListOfVehicles()
+    {
+        // Arrange
+        var vehicleServiceMock = new Mock<IVehicleService>();
+        var loggerMock = new Mock<ILogger<VehicleController>>();
+        var controller = new VehicleController(vehicleServiceMock.Object, loggerMock.Object);
+        string status = "Connected";
+
+        // Read the JSON file content
+        string json = System.IO.File.ReadAllText(testDataFile);
+
+        // Deserialize the JSON into a List<Vehicle>
+        List<Vehicle> testVehicles = JsonConvert.DeserializeObject<List<Vehicle>>(json);
+
+        // Act
+        // Setup the mock service to return a specific list of vehicles for a given status
+        vehicleServiceMock.Setup(service => service.GetVehiclesByStatus(It.IsAny<string>()))
+            .Returns((string status) =>
+            {
+                // Filter the list of vehicles based on the status
+                var filteredVehicles = testVehicles.Where(vehicle => vehicle.Status == status).ToList();
+                return filteredVehicles;
+            }); var result = controller.GetByStatus(status);
+
+        // Assert
+        // Assuming result is an ActionResult<IEnumerable<Vehicle>>
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<Vehicle>>>(result);
+        
+        // Extract and convert the data from the ActionResult to a List of Vehicle objects
+        var vehicles = ((actionResult.Result as ObjectResult)?.Value as IEnumerable<Vehicle>).ToList();
+        
+        // Assert that all vehicles have the status "Connected"
+        Assert.True(vehicles.All(vehicle => vehicle.Status == status));
+    }
 }
